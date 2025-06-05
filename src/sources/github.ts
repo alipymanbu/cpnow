@@ -12,14 +12,17 @@ export interface GitHubRef {
 export async function getGithubFiles(ref: GitHubRef, extraIgnore: string[]): Promise<Source[]> {
   const ig = getIgnorer()
 
+  const repoInfo = await ofetch(`https://api.github.com/repos/${ref.org}/${ref.repo}`, {
+    responseType: 'json',
+  })
+  const branch = repoInfo.default_branch || 'main'
+
   try {
-    const gitignoreRes = await ofetch(
-      `https://ungh.cc/repos/${ref.org}/${ref.repo}/files/HEAD/.gitignore`,
-      { responseType: 'json' },
+    const gitignore = await ofetch(
+      `https://raw.githubusercontent.com/${ref.org}/${ref.repo}/${branch}/.gitignore`,
+      { responseType: 'text' },
     )
-    if (gitignoreRes.file && gitignoreRes.file.contents) {
-      ig.add(gitignoreRes.file.contents.split('\n'))
-    }
+    ig.add((gitignore as string).split('\n'))
   }
   // eslint-disable-next-line unused-imports/no-unused-vars
   catch (e) {
@@ -29,15 +32,11 @@ export async function getGithubFiles(ref: GitHubRef, extraIgnore: string[]): Pro
     ig.add(extraIgnore)
   }
 
-  const repoInfo = await ofetch(`https://ungh.cc/repos/${ref.org}/${ref.repo}`, {
-    responseType: 'json',
-  })
-  const branch = repoInfo.repo.defaultBranch || 'main'
-
-  const tree = await ofetch(`https://ungh.cc/repos/${ref.org}/${ref.repo}/files/${branch}`, {
-    responseType: 'json',
-  })
-  let files = tree.files
+  const treeRes = await ofetch(
+    `https://api.github.com/repos/${ref.org}/${ref.repo}/git/trees/${branch}?recursive=1`,
+    { responseType: 'json' },
+  )
+  let files = (treeRes.tree || []).filter((f: any) => f.type === 'blob')
 
   if (ref.path) {
     files = files.filter((f: { path: string }) => f.path.startsWith(ref.path))
@@ -45,23 +44,22 @@ export async function getGithubFiles(ref: GitHubRef, extraIgnore: string[]): Pro
 
   const results = []
   for (const file of files) {
-    if (ig.ignores(file.path)) {
+    const path = file.path
+    if (ig.ignores(path))
       continue
-    }
     let contents = ''
-    if (isTextBased(file.path)) {
-      const fileData = await ofetch(
-        `https://ungh.cc/repos/${ref.org}/${ref.repo}/files/${branch}/${file.path}`,
-        { responseType: 'json' },
-      )
-      contents = fileData.file.contents
-      consola.info(`Fetched ${file.path}`)
+    if (isTextBased(path)) {
+      contents = await ofetch(
+        `https://raw.githubusercontent.com/${ref.org}/${ref.repo}/${branch}/${path}`,
+        { responseType: 'text' },
+      ) as string
+      consola.info(`Fetched ${path}`)
     }
     else {
-      consola.info(`Skipped downloading non-text file ${file.path}`)
+      consola.info(`Skipped downloading non-text file ${path}`)
     }
     results.push({
-      relativePath: file.path,
+      relativePath: path,
       contents,
     })
   }

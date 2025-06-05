@@ -69,18 +69,14 @@ describe('gitHub files', () => {
   it('should process a GitHub text file correctly', async () => {
     // Set up ofetch to return proper responses.
     (ofetch as any).mockImplementation((url: string) => {
-      if (url.includes('/files/HEAD/.gitignore')) {
-        return Promise.resolve({ file: { contents: '' } })
-      }
-      if (/\/repos\/org\/repo$/.test(url)) {
-        return Promise.resolve({ repo: { defaultBranch: 'main' } })
-      }
-      if (url === 'https://ungh.cc/repos/org/repo/files/main') {
-        return Promise.resolve({ files: [{ path: 'file.txt' }] })
-      }
-      if (url === 'https://ungh.cc/repos/org/repo/files/main/file.txt') {
-        return Promise.resolve({ file: { contents: 'github file content' } })
-      }
+      if (url.includes('/.gitignore'))
+        return Promise.resolve('')
+      if (/https:\/\/api.github.com\/repos\/org\/repo$/.test(url))
+        return Promise.resolve({ default_branch: 'main' })
+      if (url === 'https://api.github.com/repos/org/repo/git/trees/main?recursive=1')
+        return Promise.resolve({ tree: [{ path: 'file.txt', type: 'blob' }] })
+      if (url === 'https://raw.githubusercontent.com/org/repo/main/file.txt')
+        return Promise.resolve('github file content')
       return Promise.resolve({})
     })
 
@@ -90,18 +86,14 @@ describe('gitHub files', () => {
 
   it('should process a GitHub binary file with empty content', async () => {
     (ofetch as any).mockImplementation((url: string) => {
-      if (url.includes('/files/HEAD/.gitignore')) {
-        return Promise.resolve({ file: { contents: '' } })
-      }
-      if (/\/repos\/org\/repo$/.test(url)) {
-        return Promise.resolve({ repo: { defaultBranch: 'main' } })
-      }
-      if (url === 'https://ungh.cc/repos/org/repo/files/main') {
-        return Promise.resolve({ files: [{ path: 'image.png' }] })
-      }
-      if (url === 'https://ungh.cc/repos/org/repo/files/main/image.png') {
-        return Promise.resolve({ file: { contents: 'binary data' } })
-      }
+      if (url.includes('/.gitignore'))
+        return Promise.resolve('')
+      if (/https:\/\/api.github.com\/repos\/org\/repo$/.test(url))
+        return Promise.resolve({ default_branch: 'main' })
+      if (url === 'https://api.github.com/repos/org/repo/git/trees/main?recursive=1')
+        return Promise.resolve({ tree: [{ path: 'image.png', type: 'blob' }] })
+      if (url === 'https://raw.githubusercontent.com/org/repo/main/image.png')
+        return Promise.resolve('binary data')
       return Promise.resolve({})
     })
 
