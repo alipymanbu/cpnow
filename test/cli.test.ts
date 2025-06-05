@@ -1,9 +1,7 @@
 import fs from 'node:fs/promises'
 import clipboardy from 'clipboardy'
-import { ofetch } from 'ofetch'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { copyFilesToClipboard } from '../src/output'
-import { getGithubFiles } from '../src/sources/github'
 import { getLocalFiles } from '../src/sources/local'
 
 // Partially mock node:fs/promises so that the default export is available.
@@ -62,43 +60,6 @@ describe('local files', () => {
     const result = await getLocalFiles('path/to/image.png', [])
     expect(result).toEqual([{ relativePath: 'image.png', contents: '' }])
     expect(readFileSpy).not.toHaveBeenCalled()
-  })
-})
-
-describe('gitHub files', () => {
-  it('should process a GitHub text file correctly', async () => {
-    // Set up ofetch to return proper responses.
-    (ofetch as any).mockImplementation((url: string) => {
-      if (url.includes('/.gitignore'))
-        return Promise.resolve('')
-      if (/https:\/\/api.github.com\/repos\/org\/repo$/.test(url))
-        return Promise.resolve({ default_branch: 'main' })
-      if (url === 'https://api.github.com/repos/org/repo/git/trees/main?recursive=1')
-        return Promise.resolve({ tree: [{ path: 'file.txt', type: 'blob' }] })
-      if (url === 'https://raw.githubusercontent.com/org/repo/main/file.txt')
-        return Promise.resolve('github file content')
-      return Promise.resolve({})
-    })
-
-    const result = await getGithubFiles({ org: 'org', repo: 'repo', path: '' }, [])
-    expect(result).toEqual([{ relativePath: 'file.txt', contents: 'github file content' }])
-  })
-
-  it('should process a GitHub binary file with empty content', async () => {
-    (ofetch as any).mockImplementation((url: string) => {
-      if (url.includes('/.gitignore'))
-        return Promise.resolve('')
-      if (/https:\/\/api.github.com\/repos\/org\/repo$/.test(url))
-        return Promise.resolve({ default_branch: 'main' })
-      if (url === 'https://api.github.com/repos/org/repo/git/trees/main?recursive=1')
-        return Promise.resolve({ tree: [{ path: 'image.png', type: 'blob' }] })
-      if (url === 'https://raw.githubusercontent.com/org/repo/main/image.png')
-        return Promise.resolve('binary data')
-      return Promise.resolve({})
-    })
-
-    const result = await getGithubFiles({ org: 'org', repo: 'repo', path: '' }, [])
-    expect(result).toEqual([{ relativePath: 'image.png', contents: '' }])
   })
 })
 

@@ -21,10 +21,16 @@ const main = defineCommand({
       alias: 'i',
       description: 'Ignore patterns (tiny-glob format)',
     },
+    token: {
+      type: 'string',
+      alias: 't',
+      description: 'GitHub token for API authentication (or set GITHUB_TOKEN env variable)',
+    },
   },
   async run({ args }) {
     const { source } = args
     const ignorePatterns = args.ignore?.split(',') ?? []
+    const token = args.token || process.env.GITHUB_TOKEN
 
     let files
     if (source.startsWith('gh:') || source.startsWith('https://github.com')) {
@@ -64,7 +70,7 @@ const main = defineCommand({
           process.exit(1)
         }
       }
-      files = await getGithubFiles(ref, ignorePatterns)
+      files = await getGithubFiles(ref, ignorePatterns, token)
     }
     else {
       files = await getLocalFiles(source, ignorePatterns)

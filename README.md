@@ -41,6 +41,10 @@ Displays version information.
 
 Ignores the files/paths passed as arguments.
 
+### `-t, --token <token>`
+
+GitHub API token for authentication. Useful to avoid rate limiting when accessing GitHub repositories. You can also set the `GITHUB_TOKEN` environment variable.
+
 <!-- Badges -->
 
 [npm-version-src]: https://img.shields.io/npm/v/cpnow?style=flat&colorA=080f12&colorB=1fa669
