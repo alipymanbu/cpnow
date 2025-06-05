@@ -1,7 +1,7 @@
 {
   "name": "cpnow",
   "version": "0.0.5",
-  "packageManager": "pnpm@9.15.4",
+  "packageManager": "pnpm@10.11.1",
   "description": "Copy and paste files",
   "author": "onmax",
   "homepage": "https://github.com/onmax/cpnow#readme",
@@ -35,25 +35,25 @@
     "prepare": "simple-git-hooks"
   },
   "dependencies": {
-    "citty": "^0.1.6",
-    "clipboardy": "^4.0.0",
-    "consola": "^3.4.0",
-    "ignore": "^7.0.3",
-    "ofetch": "^1.4.1",
-    "pathe": "^2.0.2",
-    "tiny-glob": "^0.2.9"
+    "citty": "catalog:",
+    "clipboardy": "catalog:",
+    "consola": "catalog:",
+    "ignore": "catalog:",
+    "ofetch": "catalog:",
+    "pathe": "catalog:",
+    "tiny-glob": "catalog:"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^4.1.1",
-    "@types/node": "^22.13.0",
-    "bumpp": "^10.0.1",
-    "eslint": "^9.19.0",
-    "eslint-plugin-format": "^1.0.1",
-    "lint-staged": "^15.4.2",
-    "simple-git-hooks": "^2.11.1",
-    "typescript": "^5.7.3",
-    "unbuild": "^3.3.1",
-    "vitest": "^3.0.5"
+    "@antfu/eslint-config": "catalog:",
+    "@types/node": "catalog:",
+    "bumpp": "catalog:",
+    "eslint": "catalog:",
+    "eslint-plugin-format": "catalog:",
+    "lint-staged": "catalog:",
+    "simple-git-hooks": "catalog:",
+    "typescript": "catalog:",
+    "unbuild": "catalog:",
+    "vitest": "catalog:"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged"
